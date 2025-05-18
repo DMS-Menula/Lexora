@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lexora - Online Code Compiler</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/loader.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="icon" href="icon.png">
+</head>
+<body class="bg-gray-100 overflow-x-hidden">
+    <div id="pageLoader" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
+        <div class="loader animate-spin rounded-full border-4 border-t-4 border-blue-500 h-12 w-12 mb-4"></div>
+        <h2 class="text-xl font-semibold text-gray-700">Loading Lexora...</h2>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-gradient-to-r from-purple-600 to-blue-500 shadow-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand flex items-center" href="#">
+                <i class="fas fa-code me-2"></i>
+                <span class="font-bold">Lexora</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#"><i class="fas fa-home me-1"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-file-code me-1"></i> Examples</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-question-circle me-1"></i> Help</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <button class="btn btn-outline-light me-2" id="saveBtn">
+                        <i class="fas fa-save me-1"></i> Save
+                    </button>
+                    <button class="btn btn-outline-light" id="shareBtn">
+                        <i class="fas fa-share-alt me-1"></i> Share
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-3">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Editor</h5>
+                        <div class="dropdown">
+                            <div class="relative inline-block text-left">
+                                <button id="dropdownToggle"
+                                    class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-1.5 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none">
+                                    <i class="fas fa-code me-2"></i>
+                                    <span id="currentLanguage">JavaScript</span>
+                                    <svg class="-mr-1 ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20"
+                                        stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7l3-3 3 3m0 6l-3 3-3-3" />
+                                    </svg>
+                                </button>
+                            
+                                <div id="dropdownMenu"
+                                    class="origin-top-right absolute right-0 mt-2 w-44 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 hidden z-20">
+                                    <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="dropdownToggle">
+                                        <a href="#" data-lang="javascript"
+                                            class="language-option block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">JavaScript</a>
+                                        <a href="#" data-lang="python"
+                                            class="language-option block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Python</a>
+                                        <a href="#" data-lang="java"
+                                            class="language-option block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Java</a>
+                                        <a href="#" data-lang="csharp"
+                                            class="language-option block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">C#</a>
+                                        <a href="#" data-lang="php"
+                                            class="language-option block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">PHP</a>
+                                        <a href="#" data-lang="html"
+                                            class="language-option block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">HTML</a>
+                                        <a href="#" data-lang="css"
+                                            class="language-option block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">CSS</a>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="editor" style="height: 400px;"></div>
+                    </div>
+                    <div class="card-footer bg-white d-flex justify-content-between">
+                        <button class="btn btn-sm btn-primary" id="runBtn">
+                            <i class="fas fa-play me-1"></i> Run Code
+                        </button>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline-secondary" id="themeToggle">
+                                <i class="fas fa-moon me-1"></i> Dark Mode
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" id="fullscreenToggle">
+                                <i class="fas fa-expand me-1"></i> Fullscreen
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-terminal me-2"></i>Output</h5>
+                        <div class="text-muted small" id="executionTime">Ready</div>
+                    </div>
+                    <div class="card-body p-0 position-relative">
+                        <!-- Execution Loader -->
+                        <div id="executionLoader" class="hidden absolute inset-0 bg-gray-800 bg-opacity-80 z-10 flex flex-col items-center justify-center">
+                            <div class="loader animate-spin rounded-full border-4 border-t-4 border-blue-500 h-12 w-12 mb-4"></div>
+                            <h2 class="text-xl font-semibold text-white">Executing Code...</h2>
+                        </div>
+                        <div id="output" class="p-3 bg-gray-800 text-white" style="height: 400px; overflow-y: auto;"></div>
+                    </div>
+                    <div class="card-footer bg-white">
+                        <button class="btn btn-sm btn-outline-danger" id="clearOutputBtn">
+                            <i class="fas fa-trash me-1"></i> Clear
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-3 mt-4">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0"><i class="fas fa-copyright me-1"></i> 2025 Lexora. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="https://github.com/DMS-Menula" class="text-white me-3"><i class="fab fa-github me-1"></i> GitHub</a>
+                    <a href="https://www.linkedin.com/in/dinayadura-menula-sasen-de-silva-573810310/" class="text-white me-3"><i class="fab fa-linkedin me-1"></i> Linkedin</a>
+                    <a href="https://discord.gg/hgUxeNCs" class="text-white"><i class="fab fa-discord me-1"></i> Discord</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
