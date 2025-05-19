@@ -1,29 +1,29 @@
 document.addEventListener("DOMContentLoaded", function () {
-  // Initialize variables
+  
   let editor;
   let currentLanguage = "javascript";
   let isDarkMode = false;
   let isFullscreen = false;
 
-  // Hide page loader when everything is loaded
+  
   window.addEventListener("load", function () {
     setTimeout(() => {
       document.getElementById("pageLoader").classList.add("hidden");
     }, 1000);
   });
 
-  // Default code templates for each language
+  
   const codeTemplates = {
-    javascript: `// JavaScript code
+    javascript: `
 function helloWorld() {
     console.log("Hello, World!");
     return "This is JavaScript output";
 }
 
-// Call the function
+
 const result = helloWorld();
 
-// Output the result
+
 console.log("Function returned:", result);`,
     python: `# Python code
 def hello_world():
@@ -35,7 +35,7 @@ result = hello_world()
 
 # Output the result
 print("Function returned:", result)`,
-    java: `// Java code
+    java: `
 public class Main {
     public static void main(String[] args) {
         System.out.println("Hello, World!");
@@ -47,7 +47,7 @@ public class Main {
         return a + b;
     }
 }`,
-    csharp: `// C# code
+    csharp: `
 using System;
 
 class Program {
@@ -62,16 +62,16 @@ class Program {
     }
 }`,
     php: `<?php
-// PHP code
+
 function helloWorld() {
     echo "Hello, World!\\n";
     return "This is PHP output";
 }
 
-// Call the function
+
 $result = helloWorld();
 
-// Output the result
+
 echo "Function returned: " . $result . "\\n";
 ?>`,
     html: `<!DOCTYPE html>
@@ -109,7 +109,7 @@ echo "Function returned: " . $result . "\\n";
     </script>
 </body>
 </html>`,
-    css: `/* CSS Example */
+    css: `
 body {
     font-family: Arial, sans-serif;
     background-color: #f0f0f0;
@@ -149,10 +149,10 @@ header {
 }`,
   };
 
-  // Initialize Monaco Editor
+  
   require.config({
     paths: {
-      vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs",
+      vs: "https:
     },
   });
   require(["vs/editor/editor.main"], function () {
@@ -167,16 +167,16 @@ header {
       renderWhitespace: "selection",
     });
 
-    // Listen for editor content changes
+    
     editor.onDidChangeModelContent(function () {
       localStorage.setItem("lastCode_" + currentLanguage, editor.getValue());
     });
 
-    // Hide page loader when editor is ready
+    
     document.getElementById("pageLoader").classList.add("hidden");
   });
 
-  // Language selection
+  
   document.querySelectorAll(".language-option").forEach((option) => {
     option.addEventListener("click", function (e) {
       e.preventDefault();
@@ -184,7 +184,7 @@ header {
       currentLanguage = lang;
       document.getElementById("currentLanguage").textContent = this.textContent;
 
-      // Load saved code or template
+      
       const savedCode = localStorage.getItem("lastCode_" + lang);
       const template = codeTemplates[lang] || "";
       const codeToLoad = savedCode || template;
@@ -196,12 +196,12 @@ header {
     });
   });
 
-  // Run button click handler
+  
   document.getElementById("runBtn").addEventListener("click", function () {
     runCode();
   });
 
-  // Clear output button
+  
   document
     .getElementById("clearOutputBtn")
     .addEventListener("click", function () {
@@ -209,7 +209,7 @@ header {
       document.getElementById("executionTime").textContent = "Output cleared";
     });
 
-  // Theme toggle
+  
   document.getElementById("themeToggle").addEventListener("click", function () {
     isDarkMode = !isDarkMode;
     document.body.classList.toggle("dark-mode", isDarkMode);
@@ -224,7 +224,7 @@ header {
     localStorage.setItem("darkMode", isDarkMode);
   });
 
-  // Fullscreen toggle
+  
   document
     .getElementById("fullscreenToggle")
     .addEventListener("click", function () {
@@ -242,7 +242,7 @@ header {
       }
     });
 
-  // Save button
+  
   document.getElementById("saveBtn").addEventListener("click", function () {
     if (editor) {
       localStorage.setItem("lastCode_" + currentLanguage, editor.getValue());
@@ -250,7 +250,7 @@ header {
     }
   });
 
-  // Share button
+  
   document.getElementById("shareBtn").addEventListener("click", function () {
     if (editor) {
       const code = editor.getValue();
@@ -271,12 +271,12 @@ header {
     }
   });
 
-  // Check for saved dark mode preference
+  
   if (localStorage.getItem("darkMode") === "true") {
     document.getElementById("themeToggle").click();
   }
 
-  // Check for saved code
+  
   window.addEventListener("load", function () {
     const savedCode = localStorage.getItem("lastCode_" + currentLanguage);
     if (savedCode && editor) {
@@ -284,7 +284,7 @@ header {
     }
   });
 
-  // Function to run code with actual execution
+  
   function runCode() {
     const outputElement = document.getElementById("output");
     const executionTimeElement = document.getElementById("executionTime");
@@ -295,7 +295,7 @@ header {
     executionTimeElement.textContent = "Executing...";
     executionLoader.classList.remove("hidden");
 
-    // Clear previous execution if any
+    
     if (window.executionIframe) {
       document.body.removeChild(window.executionIframe);
       window.executionIframe = null;
@@ -342,9 +342,9 @@ header {
     }, 100);
   }
 
-  // Actual JavaScript execution
+  
   function executeJavaScript(code) {
-    // Capture console.log output
+    
     const originalConsoleLog = console.log;
     let consoleOutput = "";
 
@@ -359,13 +359,13 @@ header {
     };
 
     try {
-      // Execute the code
+      
       const result = new Function(code)();
 
-      // Restore original console.log
+      
       console.log = originalConsoleLog;
 
-      // Format the output
+      
       let output = "";
       if (consoleOutput) {
         output += `<pre class="console-output">${consoleOutput}</pre>`;
@@ -388,18 +388,18 @@ header {
     }
   }
 
-  // Python execution using Pyodide
+  
   async function executePython(code) {
     try {
-      // Load Pyodide if not already loaded
+      
       if (!window.pyodide) {
         showToast("Loading Python runtime...", "info");
         window.pyodide = await loadPyodide({
-          indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/"
+          indexURL: "https:
         });
       }
 
-      // Capture print output
+      
       let pythonOutput = "";
       window.pyodide.setStdout({
         batched: (text) => {
@@ -407,11 +407,11 @@ header {
         }
       });
 
-      // Execute the code
+      
       await window.pyodide.loadPackagesFromImports(code);
       const result = await window.pyodide.runPythonAsync(code);
 
-      // Format the output
+      
       let output = "";
       if (pythonOutput) {
         output += `<pre class="console-output">${pythonOutput}</pre>`;
@@ -433,9 +433,9 @@ header {
     }
   }
 
-  // Actual HTML execution
+  
   function executeHtml(code) {
-    // Create an iframe to safely execute HTML
+    
     const iframe = document.createElement("iframe");
     iframe.style.display = "none";
     document.body.appendChild(iframe);
@@ -447,7 +447,7 @@ header {
       doc.write(code);
       doc.close();
 
-      // Extract script console output
+      
       let scriptOutput = "";
       const originalConsoleLog = console.log;
 
@@ -457,7 +457,7 @@ header {
         originalConsoleLog.apply(console, arguments);
       };
 
-      // Check for scripts in the HTML
+      
       const scripts = doc.getElementsByTagName("script");
       for (let script of scripts) {
         try {
@@ -469,7 +469,7 @@ header {
 
       console.log = originalConsoleLog;
 
-      // Format the output
+      
       let output = `<div class="bg-white p-3 rounded mb-3">
                       <h5 class="mb-2">HTML Preview</h5>
                       <iframe srcdoc="${encodeURIComponent(
@@ -499,10 +499,10 @@ header {
     }
   }
 
-  // CSS execution
+  
   function executeCss(code) {
     try {
-      // Create a preview element
+      
       const preview = `
         <div class="bg-white p-3 rounded mb-3">
           <h5 class="mb-2">CSS Preview</h5>
@@ -529,17 +529,17 @@ header {
     }
   }
 
-  // Function to execute code with a compiler API (placeholder)
+  
   async function executeWithCompilerAPI(code) {
-    // This is a placeholder for actual API integration
-    // In a real implementation, you would call an API like:
-    // Judge0, JDoodle, or compile and run on your own server
+    
+    
+    
     
     try {
-      // Simulate API call delay
+      
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // This is just simulation - replace with actual API call
+      
       let output = "";
       let exitCode = 0;
       
@@ -570,7 +570,7 @@ header {
     }
   }
 
-  // Helper functions
+  
   function getFileExtension(language) {
     const extensions = {
       javascript: "js",
@@ -611,7 +611,7 @@ header {
     }, 3000);
   }
 
-  // Keyboard shortcut for running code (Ctrl+Enter)
+  
   document.addEventListener("keydown", function (e) {
     if (e.ctrlKey && e.key === "Enter") {
       e.preventDefault();
@@ -619,7 +619,7 @@ header {
     }
   });
 
-  // Load Pyodide for Python execution
+  
   async function loadPyodide(config) {
     const script = document.createElement("script");
     script.src = `${config.indexURL}pyodide.js`;
@@ -634,4 +634,35 @@ header {
       };
     });
   }
+
+  
+
+
+  const dropdownToggle = document.getElementById("dropdownToggle");
+  const dropdownMenu = document.getElementById("dropdownMenu");
+
+  dropdownToggle.addEventListener("click", (e) => {
+    e.stopPropagation();
+    dropdownMenu.classList.toggle("hidden");
+  });
+
+  
+  document.addEventListener("click", () => {
+    dropdownMenu.classList.add("hidden");
+  });
+
+  
+  document.querySelectorAll(".language-option").forEach((option) => {
+    option.addEventListener("click", (e) => {
+      e.preventDefault();
+      const lang = option.getAttribute("data-lang");
+      document.getElementById("currentLanguage").textContent =
+        option.textContent;
+      dropdownMenu.classList.add("hidden");
+      
+      console.log(`Language changed to: ${lang}`);
+    });
+  });
+
 });
+
