@@ -1,29 +1,29 @@
 document.addEventListener("DOMContentLoaded", function () {
-  
+  // Initialize variables
   let editor;
   let currentLanguage = "javascript";
   let isDarkMode = false;
   let isFullscreen = false;
 
-  
+  // Hide page loader when everything is loaded
   window.addEventListener("load", function () {
     setTimeout(() => {
       document.getElementById("pageLoader").classList.add("hidden");
     }, 1000);
   });
 
-  
+  // Default code templates for each language
   const codeTemplates = {
-    javascript: `
+    javascript: `// JavaScript code
 function helloWorld() {
     console.log("Hello, World!");
     return "This is JavaScript output";
 }
 
-
+// Call the function
 const result = helloWorld();
 
-
+// Output the result
 console.log("Function returned:", result);`,
     python: `# Python code
 def hello_world():
@@ -35,7 +35,7 @@ result = hello_world()
 
 # Output the result
 print("Function returned:", result)`,
-    java: `
+    java: `// Java code
 public class Main {
     public static void main(String[] args) {
         System.out.println("Hello, World!");
@@ -47,7 +47,7 @@ public class Main {
         return a + b;
     }
 }`,
-    csharp: `
+    csharp: `// C# code
 using System;
 
 class Program {
@@ -62,16 +62,16 @@ class Program {
     }
 }`,
     php: `<?php
-
+// PHP code
 function helloWorld() {
     echo "Hello, World!\\n";
     return "This is PHP output";
 }
 
-
+// Call the function
 $result = helloWorld();
 
-
+// Output the result
 echo "Function returned: " . $result . "\\n";
 ?>`,
     html: `<!DOCTYPE html>
@@ -109,7 +109,7 @@ echo "Function returned: " . $result . "\\n";
     </script>
 </body>
 </html>`,
-    css: `
+    css: `/* CSS Example */
 body {
     font-family: Arial, sans-serif;
     background-color: #f0f0f0;
@@ -149,10 +149,10 @@ header {
 }`,
   };
 
-  
+  // Initialize Monaco Editor
   require.config({
     paths: {
-      vs: "https:
+      vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs",
     },
   });
   require(["vs/editor/editor.main"], function () {
@@ -167,16 +167,16 @@ header {
       renderWhitespace: "selection",
     });
 
-    
+    // Listen for editor content changes
     editor.onDidChangeModelContent(function () {
       localStorage.setItem("lastCode_" + currentLanguage, editor.getValue());
     });
 
-    
+    // Hide page loader when editor is ready
     document.getElementById("pageLoader").classList.add("hidden");
   });
 
-  
+  // Language selection
   document.querySelectorAll(".language-option").forEach((option) => {
     option.addEventListener("click", function (e) {
       e.preventDefault();
@@ -184,7 +184,7 @@ header {
       currentLanguage = lang;
       document.getElementById("currentLanguage").textContent = this.textContent;
 
-      
+      // Load saved code or template
       const savedCode = localStorage.getItem("lastCode_" + lang);
       const template = codeTemplates[lang] || "";
       const codeToLoad = savedCode || template;
@@ -196,12 +196,12 @@ header {
     });
   });
 
-  
+  // Run button click handler
   document.getElementById("runBtn").addEventListener("click", function () {
     runCode();
   });
 
-  
+  // Clear output button
   document
     .getElementById("clearOutputBtn")
     .addEventListener("click", function () {
@@ -209,7 +209,7 @@ header {
       document.getElementById("executionTime").textContent = "Output cleared";
     });
 
-  
+  // Theme toggle
   document.getElementById("themeToggle").addEventListener("click", function () {
     isDarkMode = !isDarkMode;
     document.body.classList.toggle("dark-mode", isDarkMode);
@@ -224,7 +224,7 @@ header {
     localStorage.setItem("darkMode", isDarkMode);
   });
 
-  
+  // Fullscreen toggle
   document
     .getElementById("fullscreenToggle")
     .addEventListener("click", function () {
@@ -242,7 +242,7 @@ header {
       }
     });
 
-  
+  // Save button
   document.getElementById("saveBtn").addEventListener("click", function () {
     if (editor) {
       localStorage.setItem("lastCode_" + currentLanguage, editor.getValue());
@@ -250,7 +250,7 @@ header {
     }
   });
 
-  
+  // Share button
   document.getElementById("shareBtn").addEventListener("click", function () {
     if (editor) {
       const code = editor.getValue();
@@ -271,12 +271,12 @@ header {
     }
   });
 
-  
+  // Check for saved dark mode preference
   if (localStorage.getItem("darkMode") === "true") {
     document.getElementById("themeToggle").click();
   }
 
-  
+  // Check for saved code
   window.addEventListener("load", function () {
     const savedCode = localStorage.getItem("lastCode_" + currentLanguage);
     if (savedCode && editor) {
@@ -284,7 +284,7 @@ header {
     }
   });
 
-  
+  // Function to run code with actual execution for JavaScript and HTML
   function runCode() {
     const outputElement = document.getElementById("output");
     const executionTimeElement = document.getElementById("executionTime");
@@ -295,7 +295,7 @@ header {
     executionTimeElement.textContent = "Executing...";
     executionLoader.classList.remove("hidden");
 
-    
+    // Clear previous execution if any
     if (window.executionIframe) {
       document.body.removeChild(window.executionIframe);
       window.executionIframe = null;
@@ -310,22 +310,12 @@ header {
           case "javascript":
             result = executeJavaScript(code);
             break;
-          case "python":
-            result = executePython(code);
-            break;
           case "html":
             result = executeHtml(code);
             break;
-          case "css":
-            result = executeCss(code);
-            break;
-          case "java":
-          case "csharp":
-          case "php":
-            result = executeWithCompilerAPI(code);
-            break;
           default:
-            result = `<div class="error">Unsupported language: ${currentLanguage}</div>`;
+            // For other languages, we'll simulate execution
+            result = simulateExecution(code);
         }
 
         const endTime = performance.now();
@@ -342,9 +332,9 @@ header {
     }, 100);
   }
 
-  
+  // Actual JavaScript execution
   function executeJavaScript(code) {
-    
+    // Capture console.log output
     const originalConsoleLog = console.log;
     let consoleOutput = "";
 
@@ -359,13 +349,13 @@ header {
     };
 
     try {
-      
+      // Execute the code
       const result = new Function(code)();
 
-      
+      // Restore original console.log
       console.log = originalConsoleLog;
 
-      
+      // Format the output
       let output = "";
       if (consoleOutput) {
         output += `<pre class="console-output">${consoleOutput}</pre>`;
@@ -388,54 +378,9 @@ header {
     }
   }
 
-  
-  async function executePython(code) {
-    try {
-      
-      if (!window.pyodide) {
-        showToast("Loading Python runtime...", "info");
-        window.pyodide = await loadPyodide({
-          indexURL: "https:
-        });
-      }
-
-      
-      let pythonOutput = "";
-      window.pyodide.setStdout({
-        batched: (text) => {
-          pythonOutput += text;
-        }
-      });
-
-      
-      await window.pyodide.loadPackagesFromImports(code);
-      const result = await window.pyodide.runPythonAsync(code);
-
-      
-      let output = "";
-      if (pythonOutput) {
-        output += `<pre class="console-output">${pythonOutput}</pre>`;
-      }
-      if (result !== undefined) {
-        output += `<div class="mt-3"><strong>Return value:</strong> <pre class="return-value">${JSON.stringify(
-          result,
-          null,
-          2
-        )}</pre></div>`;
-      }
-
-      return (
-        output ||
-        '<div class="success">Python code executed successfully with no output</div>'
-      );
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  
+  // Actual HTML execution
   function executeHtml(code) {
-    
+    // Create an iframe to safely execute HTML
     const iframe = document.createElement("iframe");
     iframe.style.display = "none";
     document.body.appendChild(iframe);
@@ -447,7 +392,7 @@ header {
       doc.write(code);
       doc.close();
 
-      
+      // Extract script console output
       let scriptOutput = "";
       const originalConsoleLog = console.log;
 
@@ -457,7 +402,7 @@ header {
         originalConsoleLog.apply(console, arguments);
       };
 
-      
+      // Check for scripts in the HTML
       const scripts = doc.getElementsByTagName("script");
       for (let script of scripts) {
         try {
@@ -469,27 +414,27 @@ header {
 
       console.log = originalConsoleLog;
 
-      
+      // Format the output
       let output = `<div class="bg-white p-3 rounded mb-3">
-                      <h5 class="mb-2">HTML Preview</h5>
-                      <iframe srcdoc="${encodeURIComponent(
-                        code
-                      )}" style="width:100%; height:200px; border:1px solid #ddd;"></iframe>
-                   </div>`;
+                            <h5 class="mb-2">HTML Preview</h5>
+                            <iframe srcdoc="${encodeURIComponent(
+                              code
+                            )}" style="width:100%; height:200px; border:1px solid #ddd;"></iframe>
+                         </div>`;
 
       if (scriptOutput) {
         output += `<div class="mt-3">
-                     <h5 class="mb-2">Console Output</h5>
-                     <pre class="bg-gray-700 p-2 rounded">${scriptOutput}</pre>
-                  </div>`;
+                             <h5 class="mb-2">Console Output</h5>
+                             <pre class="bg-gray-700 p-2 rounded">${scriptOutput}</pre>
+                          </div>`;
       }
 
       output += `<div class="mt-3">
-                  <h5 class="mb-2">HTML Code</h5>
-                  <pre class="bg-gray-700 p-2 rounded">${escapeHtml(
-                    code
-                  )}</pre>
-               </div>`;
+                          <h5 class="mb-2">HTML Code</h5>
+                          <pre class="bg-gray-700 p-2 rounded">${escapeHtml(
+                            code
+                          )}</pre>
+                       </div>`;
 
       return output;
     } catch (error) {
@@ -499,78 +444,59 @@ header {
     }
   }
 
-  
-  function executeCss(code) {
-    try {
-      
-      const preview = `
-        <div class="bg-white p-3 rounded mb-3">
-          <h5 class="mb-2">CSS Preview</h5>
-          <style>${code}</style>
-          <div class="container">
-            <header>
-              <h1>Styled Header</h1>
-            </header>
-            <div class="content">
-              <p>This element shows how your CSS styles are applied.</p>
-              <a href="#" class="button">Styled Button</a>
-            </div>
-          </div>
-        </div>
-        <div class="mt-3">
-          <h5 class="mb-2">CSS Code</h5>
-          <pre class="bg-gray-700 p-2 rounded">${escapeHtml(code)}</pre>
-        </div>
-      `;
+  // Simulate execution for other languages
+  function simulateExecution(code) {
+    // This is a simulation - in a real app you'd call a compiler API
+    let output = `<div class="mb-3">
+                         <div class="success">Code compiled successfully (simulated)</div>
+                         <div class="text-yellow-300 mt-2">Note: This is a simulation. For actual execution, integrate with a compiler API.</div>
+                      </div>`;
 
-      return preview;
-    } catch (error) {
-      throw error;
+    // Add some example output based on language
+    switch (currentLanguage) {
+      case "python":
+        output += `<pre class="bg-gray-700 p-2 rounded">Hello, World!\nFunction returned: This is Python output</pre>`;
+        break;
+      case "java":
+        output += `<pre class="bg-gray-700 p-2 rounded">Hello, World!\n5 + 7 = 12</pre>`;
+        break;
+      case "csharp":
+        output += `<pre class="bg-gray-700 p-2 rounded">Hello, World!\n5 + 7 = 12</pre>`;
+        break;
+      case "php":
+        output += `<pre class="bg-gray-700 p-2 rounded">Hello, World!\nFunction returned: This is PHP output</pre>`;
+        break;
+      case "css":
+        output += `<div class="bg-white p-3 rounded mb-3">
+                              <h5 class="mb-2">CSS Preview</h5>
+                              <style>${code}</style>
+                              <div class="container">
+                                  <header>
+                                      <h1>CSS Preview</h1>
+                                  </header>
+                                  <div class="content">
+                                      <p>This is a preview of your CSS styles.</p>
+                                      <a href="#" class="button">Example Button</a>
+                                  </div>
+                              </div>
+                           </div>
+                           <div class="mt-3">
+                              <h5 class="mb-2">CSS Code</h5>
+                              <pre class="bg-gray-700 p-2 rounded">${escapeHtml(
+                                code
+                              )}</pre>
+                           </div>`;
+        break;
+      default:
+        output += `<pre class="bg-gray-700 p-2 rounded">${escapeHtml(
+          code
+        )}</pre>`;
     }
+
+    return output;
   }
 
-  
-  async function executeWithCompilerAPI(code) {
-    
-    
-    
-    
-    try {
-      
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      
-      let output = "";
-      let exitCode = 0;
-      
-      switch(currentLanguage) {
-        case "java":
-          output = "Hello, World!\n5 + 7 = 12";
-          break;
-        case "csharp":
-          output = "Hello, World!\n5 + 7 = 12";
-          break;
-        case "php":
-          output = "Hello, World!\nFunction returned: This is PHP output";
-          break;
-        default:
-          output = "Code executed successfully (simulated)";
-      }
-      
-      if (exitCode !== 0) {
-        throw new Error("Compilation failed");
-      }
-      
-      return `<div class="mb-3">
-                <div class="success">Code executed successfully via ${currentLanguage} compiler</div>
-                <pre class="bg-gray-700 p-2 rounded mt-2">${output}</pre>
-              </div>`;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  
+  // Helper functions
   function getFileExtension(language) {
     const extensions = {
       javascript: "js",
@@ -611,7 +537,7 @@ header {
     }, 3000);
   }
 
-  
+  // Keyboard shortcut for running code (Ctrl+Enter)
   document.addEventListener("keydown", function (e) {
     if (e.ctrlKey && e.key === "Enter") {
       e.preventDefault();
@@ -619,25 +545,7 @@ header {
     }
   });
 
-  
-  async function loadPyodide(config) {
-    const script = document.createElement("script");
-    script.src = `${config.indexURL}pyodide.js`;
-    document.head.appendChild(script);
-    
-    return new Promise((resolve) => {
-      script.onload = async () => {
-        const pyodide = await window.loadPyodide({
-          indexURL: config.indexURL
-        });
-        resolve(pyodide);
-      };
-    });
-  }
-
-  
-
-
+  // Toggle dropdown
   const dropdownToggle = document.getElementById("dropdownToggle");
   const dropdownMenu = document.getElementById("dropdownMenu");
 
@@ -646,12 +554,12 @@ header {
     dropdownMenu.classList.toggle("hidden");
   });
 
-  
+  // Close dropdown when clicking outside
   document.addEventListener("click", () => {
     dropdownMenu.classList.add("hidden");
   });
 
-  
+  // Language switching (optional functionality)
   document.querySelectorAll(".language-option").forEach((option) => {
     option.addEventListener("click", (e) => {
       e.preventDefault();
@@ -659,10 +567,8 @@ header {
       document.getElementById("currentLanguage").textContent =
         option.textContent;
       dropdownMenu.classList.add("hidden");
-      
+      // Add your language-switch logic here
       console.log(`Language changed to: ${lang}`);
     });
   });
-
 });
-
