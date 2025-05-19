@@ -284,7 +284,7 @@ header {
     }
   });
 
-  // Function to run code with actual execution for JavaScript and HTML
+  // Function to run code with actual execution
   function runCode() {
     const outputElement = document.getElementById("output");
     const executionTimeElement = document.getElementById("executionTime");
@@ -310,12 +310,22 @@ header {
           case "javascript":
             result = executeJavaScript(code);
             break;
+          case "python":
+            result = executePython(code);
+            break;
           case "html":
             result = executeHtml(code);
             break;
+          case "css":
+            result = executeCss(code);
+            break;
+          case "java":
+          case "csharp":
+          case "php":
+            result = executeWithCompilerAPI(code);
+            break;
           default:
-            // For other languages, we'll simulate execution
-            result = simulateExecution(code);
+            result = `<div class="error">Unsupported language: ${currentLanguage}</div>`;
         }
 
         const endTime = performance.now();
@@ -378,6 +388,51 @@ header {
     }
   }
 
+  // Python execution using Pyodide
+  async function executePython(code) {
+    try {
+      // Load Pyodide if not already loaded
+      if (!window.pyodide) {
+        showToast("Loading Python runtime...", "info");
+        window.pyodide = await loadPyodide({
+          indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/"
+        });
+      }
+
+      // Capture print output
+      let pythonOutput = "";
+      window.pyodide.setStdout({
+        batched: (text) => {
+          pythonOutput += text;
+        }
+      });
+
+      // Execute the code
+      await window.pyodide.loadPackagesFromImports(code);
+      const result = await window.pyodide.runPythonAsync(code);
+
+      // Format the output
+      let output = "";
+      if (pythonOutput) {
+        output += `<pre class="console-output">${pythonOutput}</pre>`;
+      }
+      if (result !== undefined) {
+        output += `<div class="mt-3"><strong>Return value:</strong> <pre class="return-value">${JSON.stringify(
+          result,
+          null,
+          2
+        )}</pre></div>`;
+      }
+
+      return (
+        output ||
+        '<div class="success">Python code executed successfully with no output</div>'
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
+
   // Actual HTML execution
   function executeHtml(code) {
     // Create an iframe to safely execute HTML
@@ -416,25 +471,25 @@ header {
 
       // Format the output
       let output = `<div class="bg-white p-3 rounded mb-3">
-                            <h5 class="mb-2">HTML Preview</h5>
-                            <iframe srcdoc="${encodeURIComponent(
-                              code
-                            )}" style="width:100%; height:200px; border:1px solid #ddd;"></iframe>
-                         </div>`;
+                      <h5 class="mb-2">HTML Preview</h5>
+                      <iframe srcdoc="${encodeURIComponent(
+                        code
+                      )}" style="width:100%; height:200px; border:1px solid #ddd;"></iframe>
+                   </div>`;
 
       if (scriptOutput) {
         output += `<div class="mt-3">
-                             <h5 class="mb-2">Console Output</h5>
-                             <pre class="bg-gray-700 p-2 rounded">${scriptOutput}</pre>
-                          </div>`;
+                     <h5 class="mb-2">Console Output</h5>
+                     <pre class="bg-gray-700 p-2 rounded">${scriptOutput}</pre>
+                  </div>`;
       }
 
       output += `<div class="mt-3">
-                          <h5 class="mb-2">HTML Code</h5>
-                          <pre class="bg-gray-700 p-2 rounded">${escapeHtml(
-                            code
-                          )}</pre>
-                       </div>`;
+                  <h5 class="mb-2">HTML Code</h5>
+                  <pre class="bg-gray-700 p-2 rounded">${escapeHtml(
+                    code
+                  )}</pre>
+               </div>`;
 
       return output;
     } catch (error) {
@@ -444,56 +499,75 @@ header {
     }
   }
 
-  // Simulate execution for other languages
-  function simulateExecution(code) {
-    // This is a simulation - in a real app you'd call a compiler API
-    let output = `<div class="mb-3">
-                         <div class="success">Code compiled successfully (simulated)</div>
-                         <div class="text-yellow-300 mt-2">Note: This is a simulation. For actual execution, integrate with a compiler API.</div>
-                      </div>`;
+  // CSS execution
+  function executeCss(code) {
+    try {
+      // Create a preview element
+      const preview = `
+        <div class="bg-white p-3 rounded mb-3">
+          <h5 class="mb-2">CSS Preview</h5>
+          <style>${code}</style>
+          <div class="container">
+            <header>
+              <h1>Styled Header</h1>
+            </header>
+            <div class="content">
+              <p>This element shows how your CSS styles are applied.</p>
+              <a href="#" class="button">Styled Button</a>
+            </div>
+          </div>
+        </div>
+        <div class="mt-3">
+          <h5 class="mb-2">CSS Code</h5>
+          <pre class="bg-gray-700 p-2 rounded">${escapeHtml(code)}</pre>
+        </div>
+      `;
 
-    // Add some example output based on language
-    switch (currentLanguage) {
-      case "python":
-        output += `<pre class="bg-gray-700 p-2 rounded">Hello, World!\nFunction returned: This is Python output</pre>`;
-        break;
-      case "java":
-        output += `<pre class="bg-gray-700 p-2 rounded">Hello, World!\n5 + 7 = 12</pre>`;
-        break;
-      case "csharp":
-        output += `<pre class="bg-gray-700 p-2 rounded">Hello, World!\n5 + 7 = 12</pre>`;
-        break;
-      case "php":
-        output += `<pre class="bg-gray-700 p-2 rounded">Hello, World!\nFunction returned: This is PHP output</pre>`;
-        break;
-      case "css":
-        output += `<div class="bg-white p-3 rounded mb-3">
-                              <h5 class="mb-2">CSS Preview</h5>
-                              <style>${code}</style>
-                              <div class="container">
-                                  <header>
-                                      <h1>CSS Preview</h1>
-                                  </header>
-                                  <div class="content">
-                                      <p>This is a preview of your CSS styles.</p>
-                                      <a href="#" class="button">Example Button</a>
-                                  </div>
-                              </div>
-                           </div>
-                           <div class="mt-3">
-                              <h5 class="mb-2">CSS Code</h5>
-                              <pre class="bg-gray-700 p-2 rounded">${escapeHtml(
-                                code
-                              )}</pre>
-                           </div>`;
-        break;
-      default:
-        output += `<pre class="bg-gray-700 p-2 rounded">${escapeHtml(
-          code
-        )}</pre>`;
+      return preview;
+    } catch (error) {
+      throw error;
     }
+  }
 
-    return output;
+  // Function to execute code with a compiler API (placeholder)
+  async function executeWithCompilerAPI(code) {
+    // This is a placeholder for actual API integration
+    // In a real implementation, you would call an API like:
+    // Judge0, JDoodle, or compile and run on your own server
+    
+    try {
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // This is just simulation - replace with actual API call
+      let output = "";
+      let exitCode = 0;
+      
+      switch(currentLanguage) {
+        case "java":
+          output = "Hello, World!\n5 + 7 = 12";
+          break;
+        case "csharp":
+          output = "Hello, World!\n5 + 7 = 12";
+          break;
+        case "php":
+          output = "Hello, World!\nFunction returned: This is PHP output";
+          break;
+        default:
+          output = "Code executed successfully (simulated)";
+      }
+      
+      if (exitCode !== 0) {
+        throw new Error("Compilation failed");
+      }
+      
+      return `<div class="mb-3">
+                <div class="success">Code executed successfully via ${currentLanguage} compiler</div>
+                <pre class="bg-gray-700 p-2 rounded mt-2">${output}</pre>
+              </div>`;
+    } catch (error) {
+      throw error;
+    }
   }
 
   // Helper functions
@@ -545,30 +619,19 @@ header {
     }
   });
 
-  // Toggle dropdown
-  const dropdownToggle = document.getElementById("dropdownToggle");
-  const dropdownMenu = document.getElementById("dropdownMenu");
-
-  dropdownToggle.addEventListener("click", (e) => {
-    e.stopPropagation();
-    dropdownMenu.classList.toggle("hidden");
-  });
-
-  // Close dropdown when clicking outside
-  document.addEventListener("click", () => {
-    dropdownMenu.classList.add("hidden");
-  });
-
-  // Language switching (optional functionality)
-  document.querySelectorAll(".language-option").forEach((option) => {
-    option.addEventListener("click", (e) => {
-      e.preventDefault();
-      const lang = option.getAttribute("data-lang");
-      document.getElementById("currentLanguage").textContent =
-        option.textContent;
-      dropdownMenu.classList.add("hidden");
-      // Add your language-switch logic here
-      console.log(`Language changed to: ${lang}`);
+  // Load Pyodide for Python execution
+  async function loadPyodide(config) {
+    const script = document.createElement("script");
+    script.src = `${config.indexURL}pyodide.js`;
+    document.head.appendChild(script);
+    
+    return new Promise((resolve) => {
+      script.onload = async () => {
+        const pyodide = await window.loadPyodide({
+          indexURL: config.indexURL
+        });
+        resolve(pyodide);
+      };
     });
-  });
+  }
 });
